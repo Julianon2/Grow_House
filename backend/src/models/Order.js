@@ -22,6 +22,12 @@ const orderSchema = new mongoose.Schema({
         index: true
         // Se generará automáticamente en el middleware
     },
+
+    isPhysicalSale: {
+        type: Boolean,
+        default: false
+        // Indica si el pedido es una venta física (sin usuario asociado) o una venta online (con usuario)
+    },
     
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -477,6 +483,7 @@ orderSchema.virtual('formattedTotals').get(function() {
  * Ejecuta cálculos automáticos antes de guardar el pedido
  */
 orderSchema.pre('save', async function(next) {
+    this.wasNew = this.isNew; 
     console.log(`💾 Procesando pedido antes de guardar: ${this.orderNumber || 'NUEVO'}`);
     
     try {
@@ -561,6 +568,20 @@ orderSchema.post('save', async function(doc) {
     console.log(`   📊 Estado: ${doc.statusText}`);
     console.log(`   🛒 Productos: ${doc.totalItems} items`);
     console.log(`   🆔 ID: ${doc._id}`);
+
+    // ✅ NUEVO: Actualizar totalSpent del usuario al crear una orden
+    if (doc.wasNew) {
+        try {
+            const User = require('./User');
+            const user = await User.findById(doc.user);
+            if (user) {
+                await user.addPurchase(doc.totals.total);
+                console.log(`💰 totalSpent actualizado para: ${user.email}`);
+            }
+        } catch (err) {
+            console.error('❌ Error actualizando totalSpent:', err.message);
+        }
+    }
     
     // Aquí podrías:
     // - Actualizar stock de productosA

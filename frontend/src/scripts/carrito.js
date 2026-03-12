@@ -11,7 +11,7 @@ console.log('🛒 carrito.js cargando...');
 const btn = document.querySelector('.add-to-cart-btn');
 const CART_CONFIG = {
     storage: {
-        cartKey: 'Grow-House-cart-data' // 
+        cartKey: 'Grow-House-cart' // 
     },
     shipping: {
         freeThreshold: 100000, // $100.000 envío gratis
@@ -41,6 +41,18 @@ const CART_CONFIG = {
 let cartItems = [];
 let appliedPromo = null;
 let isUpdating = false; // Para evitar updates múltiples
+
+function getCartKey() {
+    try {
+        const token = localStorage.getItem('growhouse-auth-token');
+        if (token) {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const userId = payload.id || payload._id || payload.sub;
+            return `${CART_CONFIG.storage.cartKey}-${userId}`;
+        }
+    } catch (e) {}
+    return `${CART_CONFIG.storage.cartKey}-guest`;
+}
 
 // =============================================
 // 2. FUNCIONES DE UTILIDAD MEJORADAS
@@ -113,7 +125,6 @@ function loadCart() {
     try {
         const saved = localStorage.getItem(CART_CONFIG.storage.cartKey);
         cartItems = saved ? JSON.parse(saved) : [];
-        console.log('📦 Carrito cargado:', cartItems);
         return cartItems;
     } catch (error) {
         console.error('❌ Error cargando carrito:', error);
@@ -125,17 +136,12 @@ function loadCart() {
 
 function saveCart() {
     try {
-        localStorage.setItem(CART_CONFIG.storage.cartKey, JSON.stringify(cartItems));
-        console.log('💾 Carrito guardado:', cartItems);
-        
-        // Trigger evento personalizado para otras partes de la app
+        localStorage.setItem(getCartKey(), JSON.stringify(cartItems));
         window.dispatchEvent(new CustomEvent('cartUpdated', { 
             detail: { items: cartItems, total: calculateTotal() } 
         }));
-        
     } catch (error) {
         console.error('❌ Error guardando carrito:', error);
-        showNotification('Error guardando el carrito', 'error');
     }
 }
 
@@ -256,6 +262,18 @@ function clearCart() {
         saveCart();
         showNotification('Carrito vaciado', 'warning');
         renderCartPage();
+    }
+}
+
+function loadCart() {
+    try {
+        const key = getCartKey();
+        const saved = localStorage.getItem(key);
+        cartItems = saved ? JSON.parse(saved) : [];
+        return cartItems;
+    } catch (error) {
+        cartItems = [];
+        return [];
     }
 }
 

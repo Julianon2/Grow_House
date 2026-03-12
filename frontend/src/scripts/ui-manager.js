@@ -47,6 +47,15 @@ const UIManager = {
             
             // Actualizar datos del usuario en el menú
             this.updateUserMenu(user);
+
+            const esAdmin = user.role === 'admin';
+
+            document.querySelectorAll('a[href="carrito.html"], a[href*="carrito"]').forEach(link => {
+                link.style.display = esAdmin ? 'none' : '';
+            });
+
+            const cartIcon = document.querySelector('a[href="carrito.html"]');
+            if (cartIcon) cartIcon.style.display = esAdmin ? 'none' : 'flex';
             
         } else {
             // ❌ USUARIO NO LOGUEADO

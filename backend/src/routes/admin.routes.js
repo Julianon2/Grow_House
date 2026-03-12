@@ -20,6 +20,9 @@ console.log('🔐 Inicializando rutas del panel administrador');
 
 // Aplicar middleware de autenticación a todas las rutas
 router.use(protect);
+// Campañas para clientes logueados
+router.get('/marketing/campaigns/public', adminController.getPublicCampaigns);
+
 router.use(authorize('admin'));
 
 // =============================================
@@ -78,6 +81,7 @@ router.post('/products', adminController.createProduct);
  * @access  Admin
  */
 router.put('/products/:id', adminController.updateProduct);
+router.get('/products/:id', adminController.getProductById);
 
 /**
  * @route   DELETE /api/admin/products/:id
@@ -117,6 +121,13 @@ router.get('/orders/:id', adminController.getOrderDetails);
  * @access  Admin
  */
 router.put('/orders/:id/status', adminController.updateOrderStatus);
+
+/**
+ * @route   POST /api/admin/orders/physical
+ * @desc    Registrar venta física en tienda
+ * @access  Admin
+ */
+router.post('/orders/physical', adminController.createPhysicalOrder);
 
 /**
  * @route   POST /api/admin/orders/:id/tracking
@@ -217,6 +228,13 @@ router.post('/coupons/:id/toggle', couponController.toggleCouponStatus);
  */
 router.get('/coupons/stats/usage', couponController.getCouponStats);
 
+/**
+ * @route   POST /api/admin/products/:id/seasonal
+ * @desc    Marcar producto como estacional
+ * @access  Admin
+ */
+router.post('/products/:id/seasonal', adminController.markAsSeasonalProduct);
+
 // =============================================
 // MARKETING Y PROMOCIONES
 // =============================================
@@ -236,11 +254,11 @@ router.post('/marketing/email', adminController.sendEmailCampaign);
 router.get('/marketing/campaigns', adminController.getCampaigns);
 
 /**
- * @route   POST /api/admin/products/:id/seasonal
- * @desc    Marcar producto como estacional
+ * @route   DELETE /api/admin/marketing/campaigns/:id
+ * @desc    Eliminar una campaña del historial
  * @access  Admin
  */
-router.post('/products/:id/seasonal', adminController.markAsSeasonalProduct);
+router.delete('/marketing/campaigns/:id', adminController.deleteCampaign);
 
 // =============================================
 // REPORTES

@@ -151,12 +151,15 @@
                             <span
                                 class="absolute bottom-0 left-0 w-0 h-0.5 bg-green-800 transition-all duration-300 group-hover:w-full"></span>
                         </button>
-
                         <!-- Ventana emergente Novedades -->
                         <div id="popupNovedades"
-                            class="hidden absolute left-0 mt-2 w-64 bg-white shadow-lg p-4 rounded-lg border border-gray-200">
-                            <h3 class="font-semibold text-lg mb-2">Últimas novedades</h3>
-                            <p class="text-sm text-gray-600">Nuevos productos disponibles.</p>
+                            class="hidden absolute left-0 mt-2 w-80 bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden">
+                            <div class="p-4 border-b bg-green-50">
+                                <h3 class="font-semibold text-lg text-green-800">Últimas novedades</h3>
+                            </div>
+                            <div id="novedadesLista" class="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+                                <p class="text-sm text-gray-500 p-4">Cargando...</p>
+                            </div>
                         </div>
                     </li>
                 </div>
@@ -473,20 +476,20 @@
                             </div>
                         </div>
 
-                        <!-- Información adicional -->
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="flex">
-                                <svg class="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                                <div>
-                                    <p class="text-sm font-medium text-blue-800">Información</p>
-                                    <p class="text-sm text-blue-700 mt-1">
-                                        La edición de perfil estará disponible próximamente. 
-                                        Por ahora puedes visualizar tu información.
-                                    </p>
-                                </div>
-                            </div>
+                        <!-- Editar perfil -->
+                        <div class="flex gap-3">
+                            <button id="edit-btn"
+                                class="flex-1 bg-green-700 hover:bg-green-800 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-edit"></i> Editar Perfil
+                            </button>
+                            <button id="save-btn" style="display:none"
+                                class="flex-1 bg-green-700 hover:bg-green-800 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                            <button id="cancel-btn" style="display:none"
+                                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -495,7 +498,7 @@
                 <div class="mt-6 grid md:grid-cols-2 gap-4">
                     <button 
                         onclick="window.location.href='index.html'"
-                        class="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                        class="w-full bg-gray-400 hover:bg-gray-500 text-white py-3 px-6 rounded-lg font-medium transition-colors"
                     >
                         Volver al Inicio
                     </button>
@@ -615,146 +618,215 @@
 <script src="../scripts/main.js"></script>
     <!-- Script adicional para animaciones -->
 
-    <script>
-        // =============================================
-        // CARGAR DATOS DEL PERFIL
-        // =============================================
+<script>
+    // =============================================
+    // CARGAR DATOS DEL PERFIL
+    // =============================================
 
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('📄 Página de perfil cargada');
-            
-            // Verificar autenticación
-            if (!authAPI.isAuthenticated()) {
-                console.log('❌ Usuario no autenticado');
-                authAPI.showNotification('Debes iniciar sesión', 'warning');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1500);
-                return;
+    let isEditMode = false;
+
+    function fillProfileForm(user) {
+        console.log('fillProfileForm llamado, isEditMode:', isEditMode);
+        if (isEditMode) return;
+        document.getElementById('firstName').value = user.firstName || '';
+        document.getElementById('lastName').value  = user.lastName  || '';
+        document.getElementById('email').value     = user.email     || '';
+        document.getElementById('phone').value     = user.phone     || '';
+        document.getElementById('role').value      = user.role === 'admin' ? 'Administrador' : 'Cliente';
+        document.getElementById('user-fullname').textContent = `${user.firstName} ${user.lastName}`;
+        document.getElementById('user-email').textContent    = user.email;
+        const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+        document.getElementById('user-avatar').textContent = initials;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 Página de perfil cargada');
+
+        if (!authAPI.isAuthenticated()) {
+            authAPI.showNotification('Debes iniciar sesión', 'warning');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+            return;
+        }
+
+        const user = authAPI.getUser();
+        if (!user) {
+            authAPI.showNotification('Error al cargar perfil', 'error');
+            return;
+        }
+
+        fillProfileForm(user);
+
+        // ✅ INICIALIZAR PROFILE IMAGE MANAGER
+        if (window.ProfileImageManager && ProfileImageManager.init) {
+            ProfileImageManager.init();
+        }
+
+        // Badge de rol
+        const roleBadge = document.getElementById('user-role-badge');
+        if (roleBadge) {
+            roleBadge.textContent = user.role === 'admin' ? '🔧 Administrador' : '👤 Cliente';
+            if (user.role === 'admin') roleBadge.classList.add('bg-yellow-400', 'text-yellow-900');
+        }
+
+        // Email verificado
+        const emailVerified = document.getElementById('email-verified');
+        if (emailVerified) {
+            emailVerified.innerHTML = user.isEmailVerified
+                ? '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">✅ Verificado</span>'
+                : '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">No verificado</span>';
+        }
+
+        // Estado de la cuenta
+        const accountStatus = document.getElementById('account-status');
+        if (accountStatus) {
+            accountStatus.innerHTML = user.isActive
+                ? '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">✅ Activa</span>'
+                : '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">❌ Inactiva</span>';
+        }
+
+        // Botón logout
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                authAPI.logout();
+                authAPI.showNotification('Sesión cerrada exitosamente', 'success');
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
             }
-
-            // Obtener datos del usuario
-            const user = authAPI.getUser();
-            
-            if (!user) {
-                console.log('❌ No se pudieron obtener datos del usuario');
-                authAPI.showNotification('Error al cargar perfil', 'error');
-                return;
-            }
-
-            console.log('✅ Datos del usuario:', user);
-
-            // Llenar formulario
-            document.getElementById('firstName').value = user.firstName || '';
-            document.getElementById('lastName').value = user.lastName || '';
-            document.getElementById('email').value = user.email || '';
-            document.getElementById('phone').value = user.phone || '';
-            document.getElementById('role').value = user.role === 'admin' ? 'Administrador' : 'Cliente';
-
-            // Llenar tarjeta de perfil
-            document.getElementById('user-fullname').textContent = `${user.firstName} ${user.lastName}`;
-            document.getElementById('user-email').textContent = user.email;
-            
-            // Avatar con iniciales
-            const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
-            document.getElementById('user-avatar').textContent = initials;
-
-            // ✅ INICIALIZAR PROFILE IMAGE MANAGER
-            if (window.ProfileImageManager && ProfileImageManager.init) {
-                ProfileImageManager.init();
-            } else {
-                console.warn('⚠️ ProfileImageManager no está disponible');
-            }
-
-            // Badge de rol
-            const roleBadge = document.getElementById('user-role-badge');
-            if (roleBadge) {
-                if (user.role === 'admin') {
-                    roleBadge.textContent = '🔧 Administrador';
-                    roleBadge.classList.add('bg-yellow-400', 'text-yellow-900');
-                } else {
-                    roleBadge.textContent = '👤 Cliente';
-                }
-            }
-
-            // Email verificado
-            const emailVerified = document.getElementById('email-verified');
-            if (user.isEmailVerified) {
-                emailVerified.innerHTML = '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">✅ Verificado</span>';
-            }
-
-            // Estado de la cuenta
-            const accountStatus = document.getElementById('account-status');
-            if (user.isActive) {
-                accountStatus.innerHTML = '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">✅ Activa</span>';
-            } else {
-                accountStatus.innerHTML = '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">❌ Inactiva</span>';
-            }
-            
-            // Botón de logout
-            document.getElementById('logout-btn').addEventListener('click', function() {
-                if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                    authAPI.logout();
-                    authAPI.showNotification('Sesión cerrada exitosamente', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                }
-            });
-
-            // Cargar imagen de perfil en el navbar
-            function loadUserAvatarInNavbar() {
-                try {
-                    const userId = user.id;
-                    const storageKey = `growhouse-user-avatar:${userId}`;
-                    const savedImage = localStorage.getItem(storageKey);
-                    
-                    if (savedImage) {
-                        const imageData = JSON.parse(savedImage);
-                        const imgElement = document.getElementById('user-avatar-menu-image');
-                        const textElement = document.getElementById('user-initials');
-                        
-                        if (imgElement) {
-                            imgElement.src = imageData.base64;
-                            imgElement.classList.remove('hidden');
-                            textElement.classList.add('hidden');
-                        }
-                    }
-                } catch (error) {
-                    console.warn('⚠️ Error al cargar avatar en navbar:', error);
-                }
-            }
-
-            loadUserAvatarInNavbar();
-
-            // Escuchar cambios de perfil
-            window.addEventListener('userProfileUpdated', function() {
-                loadUserAvatarInNavbar();
-            });
-
-            // =============================================
-            // BOTÓN PARA ELIMINAR IMAGEN DE PERFIL
-            // =============================================
-            const deleteBtn = document.getElementById('delete-profile-btn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', function() {
-                    console.log('🗑️ Click en botón eliminar imagen');
-                    
-                    // Confirmar antes de eliminar
-                    if (confirm('¿Estás seguro de que deseas eliminar tu foto de perfil?')) {
-                        if (ProfileImageManager && ProfileImageManager.deleteImage) {
-                            ProfileImageManager.deleteImage();
-                            console.log('✅ Imagen eliminada');
-                        } else {
-                            console.error('❌ ProfileImageManager no disponible');
-                        }
-                    }
-                });
-            }
-
-
         });
-    </script>
+
+        // Avatar navbar
+        function loadUserAvatarInNavbar() {
+            try {
+                const storageKey = `growhouse-user-avatar:${user.id}`;
+                const savedImage = localStorage.getItem(storageKey);
+                if (savedImage) {
+                    const imageData = JSON.parse(savedImage);
+                    const imgElement = document.getElementById('user-avatar-menu-image');
+                    const textElement = document.getElementById('user-initials');
+                    if (imgElement) {
+                        imgElement.src = imageData.base64;
+                        imgElement.classList.remove('hidden');
+                        if (textElement) textElement.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Error al cargar avatar en navbar:', error);
+            }
+        }
+        loadUserAvatarInNavbar();
+        window.addEventListener('userProfileUpdated', loadUserAvatarInNavbar);
+
+        // Botón eliminar imagen
+        const deleteBtn = document.getElementById('delete-profile-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que deseas eliminar tu foto de perfil?')) {
+                    if (ProfileImageManager && ProfileImageManager.deleteImage) {
+                        ProfileImageManager.deleteImage();
+                    }
+                }
+            });
+        }
+
+        // Escuchar actualizaciones externas del perfil
+        window.addEventListener('userDataUpdated', function(e) {
+            if (!isEditMode) fillProfileForm(e.detail || authAPI.getUser());
+        });
+
+        // =============================================
+        // EDITAR PERFIL
+        // =============================================
+        const editableFields = ['firstName', 'lastName', 'phone'];
+        let originalValues = {};
+
+        document.getElementById('edit-btn').addEventListener('click', function() {
+            isEditMode = true;
+            editableFields.forEach(id => {
+                originalValues[id] = document.getElementById(id).value;
+                const input = document.getElementById(id);
+                input.removeAttribute('readonly');
+                input.classList.add('bg-white', 'border-green-400');
+                input.classList.remove('border-gray-300');
+            });
+            document.getElementById('edit-btn').style.display   = 'none';
+            document.getElementById('save-btn').style.display   = '';
+            document.getElementById('cancel-btn').style.display = '';
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            isEditMode = false;
+            editableFields.forEach(id => {
+                const input = document.getElementById(id);
+                input.value = originalValues[id];
+                input.setAttribute('readonly', true);
+                input.classList.remove('bg-white', 'border-green-400');
+                input.classList.add('border-gray-300');
+            });
+            document.getElementById('edit-btn').style.display   = '';
+            document.getElementById('save-btn').style.display   = 'none';
+            document.getElementById('cancel-btn').style.display = 'none';
+        });
+
+        document.getElementById('save-btn').addEventListener('click', async function() {
+            const btn = this;
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
+            try {
+                const token = localStorage.getItem('growhouse-auth-token');
+                const payload = {
+                    firstName: document.getElementById('firstName').value.trim(),
+                    lastName:  document.getElementById('lastName').value.trim(),
+                    phone:     document.getElementById('phone').value.trim()
+                };
+
+                const res = await fetch('http://localhost:5000/api/auth/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    // Actualizar localStorage con la clave correcta
+                    authAPI.saveUser(data.user);
+
+                    isEditMode = false;
+
+                    // Actualizar UI
+                    fillProfileForm(data.user);
+
+                    // Volver a readonly
+                    editableFields.forEach(id => {
+                        const input = document.getElementById(id);
+                        input.setAttribute('readonly', true);
+                        input.classList.remove('bg-white', 'border-green-400');
+                        input.classList.add('border-gray-300');
+                    });
+
+                    document.getElementById('edit-btn').style.display   = '';
+                    document.getElementById('save-btn').style.display   = 'none';
+                    document.getElementById('cancel-btn').style.display = 'none';
+
+                    authAPI.showNotification('Perfil actualizado correctamente', 'success');
+                } else {
+                    authAPI.showNotification(data.error || 'Error al actualizar', 'error');
+                }
+
+            } catch (err) {
+                console.error('Error:', err);
+                authAPI.showNotification('Error de conexión', 'error');
+            } finally {
+                btn.innerHTML = orig;
+                btn.disabled  = false;
+            }
+        });
+    });
+</script>
     <!-- Submenú Seguridad -->
     <div id="submenu-seguridad" class="floating-submenu">
         <div class="px-4 py-2 border-b border-gray-100">

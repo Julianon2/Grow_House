@@ -20,25 +20,31 @@
         <p class="text-sm">Panel Administrador</p>
       </div>
     </div>
-
-    <nav class="mt-6">
-      <a href="dashboard.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
-        <i class="fas fa-chart-bar"></i> Estadisticas
-      </a>
-      <a href="admin-products.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
-        <i class="fas fa-shopping-cart"></i> Productos
-      </a>
-      <a href="admin-orders.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
-        <i class="fas fa-bag-shopping"></i> Pedidos
-      </a>
-      <a href="admin-customers.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
-        <i class="fas fa-users"></i> Clientes
-      </a>
-      <a href="admin-coupons.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
-        <i class="fas fa-ticket-alt"></i> Cupones
-      </a>
-    </nav>
-
+        <nav class="mt-6">
+            <a href="dashboard.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
+                <i class="fas fa-chart-bar"></i> Estadisticas
+            </a>
+            <a href="admin-products.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Productos</span>
+            </a>
+            <a href="admin-orders.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
+                <i class="fas fa-bag-shopping"></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="admin-customers.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </a>
+            <a href="admin-coupons.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Cupones</span>
+            </a>
+            <a href="admin-marketing.html" class="flex items-center gap-3 px-6 py-3 hover:bg-green-700 transition">
+                <i class="fas fa-envelope w-4"></i>
+                <span>Marketing</span>
+            </a>
+        </nav>
     <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-green-700">
       <a href="index.html" class="w-full bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-lg text-sm block text-center mb-2">
         <i class="fas fa-home mr-2"></i> Volver al inicio
@@ -192,8 +198,8 @@
         <div style="background:#f9fafb;border-radius:12px;padding:16px;">
           <p style="font-size:0.7rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px;">Estado</p>
           <p style="font-weight:600;color:#1f2937;" id="modalStatus">—</p>
-          <p style="font-size:0.75rem;color:#9ca3af;margin-top:6px;">Fecha: <span style="color:#4b5563;" id="modalDate">—</span></p>
-          <p style="font-size:0.75rem;color:#9ca3af;">Pago: <span style="color:#4b5563;" id="modalPayment">—</span></p>
+          <p style="font-size:0.75rem;color:#9ca3af;margin-top:6px;">Fecha del pedido: <span style="color:#4b5563;" id="modalDate">—</span></p>
+          <p style="font-size:0.75rem;color:#9ca3af;"> Metodo de pago: <span style="color:#4b5563;" id="modalPayment">—</span></p>
         </div>
       </div>
       <div style="background:#f9fafb;border-radius:12px;padding:16px;">
@@ -281,20 +287,20 @@
             tbody.innerHTML += `
               <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4 text-sm font-mono text-gray-700">${order.orderNumber || order._id}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-800">${order.user?.firstName || ''} ${order.user?.lastName || ''}</td>
-                <td class="px-6 py-4 text-sm text-gray-500">${order.user?.email || 'N/A'}</td>
+                <td class="px-6 py-4 text-sm font-medium text-gray-800">${order.isPhysicalSale ? (order.shippingAddress?.firstName || '') + ' ' + (order.shippingAddress?.lastName || '') : (order.user?.firstName || '') + ' ' + (order.user?.lastName || '')}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${order.isPhysicalSale ? (order.shippingAddress?.email || 'Venta física') : (order.user?.email || 'N/A')}</td>
                 <td class="px-6 py-4 text-sm font-semibold text-gray-800">$${order.totals?.total.toLocaleString('es-CO')}</td>
-                <td class="px-6 py-4">${statusBadge(order.status)}</td>
+                <td class="px-6 py-4">${statusBadge(order.status, order.isPhysicalSale)}</td>
                 <td class="px-6 py-4 text-sm text-gray-500">${new Date(order.createdAt).toLocaleDateString('es-CO')}</td>
                 <td class="px-6 py-4 flex items-center gap-2">
                   <button onclick="viewOrder(${index})"
                     class="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-sm font-medium transition">
                     <i class="fas fa-eye"></i> Ver
                   </button>
-                  ${!cancelado ? `
+                  ${!cancelado && !order.isPhysicalSale ? `
                   <button onclick="cambiarEstado(${index})"
-                    class="inline-flex items-center gap-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg text-sm font-medium transition">
-                    <i class="fas fa-edit"></i> Estado
+                      class="inline-flex items-center gap-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                      <i class="fas fa-edit"></i> Estado
                   </button>` : ''}
                 </td>
               </tr>
@@ -327,7 +333,7 @@
         confirmed:  { label: 'Confirmado',       color: '#1e40af', bg: '#dbeafe' },
         processing: { label: 'En Preparación',   color: '#6d28d9', bg: '#ede9fe' },
         shipped:    { label: 'Enviado',          color: '#065f46', bg: '#d1fae5' },
-        delivered:  { label: 'Entregado',        color: '#14532d', bg: '#bbf7d0' },
+        delivered:  { label: order?.isPhysicalSale ? 'Entregado en punto físico' : 'Entregado', cls: 'background:#d1fae5;color:#065f46;' },
         cancelled:  { label: 'Cancelado',        color: '#991b1b', bg: '#fee2e2' },
         returned:   { label: 'Devuelto',         color: '#9d174d', bg: '#fce7f3' },
       };
@@ -386,58 +392,90 @@
       document.getElementById('cancelledOrders').textContent = orders.filter(o => o.status === 'cancelled').length;
     }
 
-    function statusBadge(status) {
-      const map = {
-        pending:    { label: 'Pendiente',      cls: 'background:#fef9c3;color:#92700a;' },
-        confirmed:  { label: 'Confirmado',     cls: 'background:#dbeafe;color:#1e40af;' },
-        processing: { label: 'En Preparación', cls: 'background:#ede9fe;color:#6d28d9;' },
-        shipped:    { label: 'Enviado',        cls: 'background:#d1fae5;color:#065f46;' },
-        delivered:  { label: 'Entregado',      cls: 'background:#d1fae5;color:#065f46;' },
-        cancelled:  { label: 'Cancelado',      cls: 'background:#fee2e2;color:#991b1b;' },
-        returned:   { label: 'Devuelto',       cls: 'background:#fce7f3;color:#9d174d;' },
-      };
-      const s = map[status] || { label: status, cls: '' };
-      return `<span style="display:inline-block;padding:5px 16px;border-radius:999px;font-size:0.82rem;font-weight:600;${s.cls}">${s.label}</span>`;
+    function statusBadge(status, isPhysical) {
+        const deliveredLabel = isPhysical ? 'Entregado en punto físico' : 'Entregado';
+        const map = {
+            pending:    { label: 'Pendiente',      cls: 'background:#fef9c3;color:#92700a;' },
+            confirmed:  { label: 'Confirmado',     cls: 'background:#dbeafe;color:#1e40af;' },
+            processing: { label: 'En Preparación', cls: 'background:#ede9fe;color:#6d28d9;' },
+            shipped:    { label: 'Enviado',        cls: 'background:#d1fae5;color:#065f46;' },
+            delivered:  { label: deliveredLabel,   cls: 'background:#d1fae5;color:#065f46;' },
+            cancelled:  { label: 'Cancelado',      cls: 'background:#fee2e2;color:#991b1b;' },
+            returned:   { label: 'Devuelto',       cls: 'background:#fce7f3;color:#9d174d;' },
+        };
+        const s = map[status] || { label: status, cls: '' };
+        return `<span style="display:inline-block;padding:5px 16px;border-radius:999px;font-size:0.82rem;font-weight:600;${s.cls}">${s.label}</span>`;
     }
 
     function viewOrder(index) {
-      const order = ordersCache[index];
-      currentOrderId = order.id;
-      document.getElementById('modalOrderNumber').textContent = order.orderNumber || order._id;
-      document.getElementById('modalClientName').textContent  = `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() || 'N/A';
-      document.getElementById('modalClientEmail').textContent = order.user?.email || 'N/A';
-      document.getElementById('modalClientPhone').textContent = order.shippingAddress?.phone ? '📞 ' + order.shippingAddress.phone : '';
-      const sMap = { pending:'Pendiente', confirmed:'Confirmado', processing:'En Preparación', shipped:'Enviado', delivered:'Entregado', cancelled:'Cancelado', returned:'Devuelto' };
-      document.getElementById('modalStatus').textContent = sMap[order.status] || order.status;
-      document.getElementById('modalDate').textContent    = new Date(order.createdAt).toLocaleDateString('es-CO', {year:'numeric',month:'long',day:'numeric'});
-      document.getElementById('modalPayment').textContent = order.paymentMethod?.replace(/_/g,' ') || 'N/A';
-      const addr = order.shippingAddress;
-      document.getElementById('modalAddress').textContent = addr ? `${addr.street}, ${addr.city}, ${addr.state}, ${addr.country || 'Colombia'}` : 'No especificada';
-      const prodContainer = document.getElementById('modalProducts');
-      prodContainer.innerHTML = '';
-      (order.products || []).forEach(item => {
-        const pName = item.product?.name || item.name || 'Producto';
-        const pImg  = item.image || item.product?.mainImage || '';
-        const sub   = (item.price || 0) * (item.quantity || 1);
-        prodContainer.innerHTML += `
-          <div style="display:flex;align-items:center;gap:12px;background:#f9fafb;border-radius:12px;padding:12px;">
-            ${pImg ? `<img src="${pImg}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;">` 
-                  : `<div style="width:56px;height:56px;background:#d1fae5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#065f46;font-size:1.2rem;">🌱</div>`}
-            <div style="flex:1;">
-              <p style="font-weight:600;font-size:0.9rem;color:#1f2937;">${pName}</p>
-              <p style="font-size:0.78rem;color:#9ca3af;">$${(item.price||0).toLocaleString('es-CO')} × ${item.quantity} unidad${item.quantity>1?'es':''}</p>
-            </div>
-            <p style="font-weight:700;font-size:0.9rem;color:#1f2937;white-space:nowrap;">$${sub.toLocaleString('es-CO')}</p>
-          </div>`;
-      });
-      const t = order.totals || {};
-      document.getElementById('modalSubtotal').textContent = '$' + (t.subtotal||0).toLocaleString('es-CO');
-      document.getElementById('modalTax').textContent      = '$' + (t.tax||0).toLocaleString('es-CO');
-      document.getElementById('modalShipping').textContent = '$' + (t.shipping||0).toLocaleString('es-CO');
-      document.getElementById('modalDiscount').textContent = t.discount ? '-$' + t.discount.toLocaleString('es-CO') : '$0';
-      document.getElementById('modalTotal').textContent    = '$' + (t.total||0).toLocaleString('es-CO');
-      document.getElementById('orderModal').style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+        const order = ordersCache[index];
+        currentOrderId = order.id;
+
+        document.getElementById('modalOrderNumber').textContent = order.orderNumber || order._id;
+
+        // ── Cliente: si es venta física toma shippingAddress, si no el usuario ──
+        if (order.isPhysicalSale) {
+            const addr = order.shippingAddress;
+            document.getElementById('modalClientName').textContent  = `${addr?.firstName || ''} ${addr?.lastName || ''}`.trim() || 'N/A';
+            document.getElementById('modalClientEmail').textContent = addr?.email ? 'Correo: ' + addr.email : 'Venta física';
+            document.getElementById('modalClientPhone').textContent = addr?.phone ? 'Teléfono: ' + addr.phone : '';
+        } else {
+            document.getElementById('modalClientName').textContent  = `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() || 'N/A';
+            document.getElementById('modalClientEmail').textContent = order.user?.email ? 'Correo: ' + order.user.email : 'N/A';
+            document.getElementById('modalClientPhone').textContent = order.shippingAddress?.phone ? 'Teléfono: ' + order.shippingAddress.phone : '';
+        }
+
+        // ── Estado ──
+        const sMap = {
+            pending:    'Pendiente',
+            confirmed:  'Confirmado',
+            processing: 'En Preparación',
+            shipped:    'Enviado',
+            delivered:  order.isPhysicalSale ? 'Entregado en punto físico' : 'Entregado',
+            cancelled:  'Cancelado',
+            returned:   'Devuelto'
+        };
+        document.getElementById('modalStatus').textContent  = sMap[order.status] || order.status;
+        document.getElementById('modalDate').textContent    = new Date(order.createdAt).toLocaleDateString('es-CO', { year:'numeric', month:'long', day:'numeric' });
+        document.getElementById('modalPayment').textContent = order.paymentMethod?.replace(/_/g, ' ') || 'N/A';
+
+        // ── Dirección ──
+        const addr = order.shippingAddress;
+        document.getElementById('modalAddress').textContent = addr
+            ? `${addr.street}, ${addr.city}, ${addr.state}, ${addr.country || 'Colombia'}`
+            : 'No especificada';
+
+        // ── Productos ──
+        const prodContainer = document.getElementById('modalProducts');
+        prodContainer.innerHTML = '';
+        (order.products || []).forEach(item => {
+            const pName = item.name || item.product?.name || 'Producto';
+            const pImg  = item.image || item.product?.mainImage || '';
+            const sub   = (item.price || 0) * (item.quantity || 1);
+            prodContainer.innerHTML += `
+                <div style="display:flex;align-items:center;gap:12px;background:#f9fafb;border-radius:12px;padding:12px;">
+                    ${pImg
+                        ? `<img src="${pImg}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;">`
+                        : `<div style="width:56px;height:56px;background:#d1fae5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#065f46;font-size:1.2rem;">🌱</div>`
+                    }
+                    <div style="flex:1;">
+                        <p style="font-weight:600;font-size:0.9rem;color:#1f2937;">${pName}</p>
+                        <p style="font-size:0.78rem;color:#9ca3af;">$${(item.price||0).toLocaleString('es-CO')} × ${item.quantity} unidad${item.quantity > 1 ? 'es' : ''}</p>
+                    </div>
+                    <p style="font-weight:700;font-size:0.9rem;color:#1f2937;white-space:nowrap;">$${sub.toLocaleString('es-CO')}</p>
+                </div>`;
+        });
+
+        // ── Totales ──
+        const t = order.totals || {};
+        document.getElementById('modalSubtotal').textContent = '$' + (t.subtotal || 0).toLocaleString('es-CO');
+        document.getElementById('modalTax').textContent      = '$' + (t.tax      || 0).toLocaleString('es-CO');
+        document.getElementById('modalShipping').textContent = '$' + (t.shipping || 0).toLocaleString('es-CO');
+        document.getElementById('modalDiscount').textContent = t.discount ? '-$' + t.discount.toLocaleString('es-CO') : '$0';
+        document.getElementById('modalTotal').textContent    = '$' + (t.total    || 0).toLocaleString('es-CO');
+
+        document.getElementById('orderModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
 
     function closeModal() {

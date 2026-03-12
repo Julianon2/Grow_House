@@ -18,6 +18,12 @@ const {
     deleteProduct
 } = require('../controllers/productController');
 
+// Importar controladores de admin (marketing)
+const {
+    getCampaigns,
+    sendEmailCampaign
+} = require('../controllers/adminController');
+
 console.log('🛣️ Inicializando rutas de productos Grow House');
 
 // =============================================
@@ -53,6 +59,14 @@ router.get('/search/:query', (req, res, next) => {
     req.query.search = req.params.query;
     getAllProducts(req, res, next);
 });
+
+/**
+ * @route   GET /api/products/campaigns
+ * @desc    Obtener todas las campañas de marketing
+ * @access  Privado (admin)
+ * IMPORTANTE: debe ir ANTES de /:id para que Express no lo confunda con un ID
+ */
+router.get('/campaigns', protect, authorize('admin'), getCampaigns);
 
 // =============================================
 // RUTAS PÚBLICAS GENERALES
@@ -191,7 +205,6 @@ router.get('/:id/my-rating', protect, async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error interno del servidor' });
     }
 });
-
 
 /**
  * @route   GET /api/products/:id

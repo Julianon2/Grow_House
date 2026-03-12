@@ -326,6 +326,9 @@ console.log('✅ Código de verificación enviado a:', data.email);
 
         console.log('✅ Sesión cerrada exitosamente');
 
+        userFavorites = [];
+        updateFavoritesCounter();
+
         // Emitir evento personalizado para que otras partes de la app
         // sepan que el usuario cerró sesión
         window.dispatchEvent(new CustomEvent('userLoggedOut'));
@@ -385,6 +388,7 @@ console.log('✅ Código de verificación enviado a:', data.email);
      */
     saveUser(user) {
         try {
+            console.trace('📍 saveUser llamado desde:'); // ← agrega esta línea
             localStorage.setItem(AUTH_CONFIG.storage.userKey, JSON.stringify(user));
             console.log('✅ Datos de usuario actualizados');
         } catch (error) {
