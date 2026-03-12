@@ -26,45 +26,43 @@ const NovedadesNotificacionesManager = {
      * Se muestra solo si el usuario está autenticado
      */
     actualizarVisibilidad: function() {
-        // Verificar si authAPI está disponible
         if (typeof authAPI === 'undefined') {
             this.log('authAPI no está disponible', 'warning');
             return;
         }
 
         const isAuthenticated = authAPI.isAuthenticated();
-        this.log(`Actualizando visibilidad - Autenticado: ${isAuthenticated}`, 'info');
+        // NUEVO: obtener rol del usuario
+        const user = JSON.parse(localStorage.getItem('growhouse-user-data') || '{}');
+        const isAdmin = user?.role === 'admin';
 
-        // Obtener elementos del DOM
+        this.log(`Autenticado: ${isAuthenticated} | Admin: ${isAdmin}`, 'info');
+
         const btnNovedades = document.getElementById("btnNovedades");
         const popupNovedades = document.getElementById("popupNovedades");
         const btnNotificaciones = document.getElementById("btnNotificaciones");
         const popupNotificaciones = document.getElementById("popupNotificaciones");
 
-        // Actualizar visibilidad de Novedades
+        // Novedades — visible solo si está autenticado Y no es admin
         if (btnNovedades && popupNovedades) {
-            if (isAuthenticated) {
-                btnNovedades.style.display = ''; // Mostrar
-                popupNovedades.style.display = ''; // Mostrar
+            if (isAuthenticated && !isAdmin) {
+                btnNovedades.style.display = '';
                 this.log('Botón Novedades: VISIBLE ✅', 'success');
             } else {
-                btnNovedades.style.display = 'none'; // Ocultar
-                popupNovedades.style.display = 'none'; // Ocultar
-                popupNovedades.classList.add('hidden'); // Asegurar que esté oculto
+                btnNovedades.style.display = 'none';
+                popupNovedades.classList.add('hidden');
                 this.log('Botón Novedades: OCULTO ❌', 'warning');
             }
         }
 
-        // Actualizar visibilidad de Notificaciones
+        // Notificaciones — sin cambios
         if (btnNotificaciones && popupNotificaciones) {
             if (isAuthenticated) {
-                btnNotificaciones.style.display = ''; // Mostrar
-                popupNotificaciones.style.display = ''; // Mostrar
+                btnNotificaciones.style.display = '';
                 this.log('Botón Notificaciones: VISIBLE ✅', 'success');
             } else {
-                btnNotificaciones.style.display = 'none'; // Ocultar
-                popupNotificaciones.style.display = 'none'; // Ocultar
-                popupNotificaciones.classList.add('hidden'); // Asegurar que esté oculto
+                btnNotificaciones.style.display = 'none';
+                popupNotificaciones.classList.add('hidden');
                 this.log('Botón Notificaciones: OCULTO ❌', 'warning');
             }
         }
@@ -73,46 +71,97 @@ const NovedadesNotificacionesManager = {
     /**
      * 🎯 Inicializa los event listeners
      */
-    inicializarEventos: function() {
-        const btnNovedades = document.getElementById("btnNovedades");
-        const popupNovedades = document.getElementById("popupNovedades");
-        const btnNotificaciones = document.getElementById("btnNotificaciones");
-        const popupNotificaciones = document.getElementById("popupNotificaciones");
+inicializarEventos: function() {
+    const btnNovedades = document.getElementById("btnNovedades");
+    const popupNovedades = document.getElementById("popupNovedades");
+    const btnNotificaciones = document.getElementById("btnNotificaciones");
+    const popupNotificaciones = document.getElementById("popupNotificaciones");
 
-        if (!btnNovedades || !btnNotificaciones) {
-            this.log('Botones de novedades/notificaciones no encontrados en el DOM', 'warning');
+    if (!btnNovedades || !btnNotificaciones) {
+        this.log('Botones de novedades/notificaciones no encontrados en el DOM', 'warning');
+        return;
+    }
+
+    // Función para cerrar todos los popups
+    const cerrarPopups = () => {
+        if (popupNovedades) popupNovedades.classList.add("hidden");
+        if (popupNotificaciones) popupNotificaciones.classList.add("hidden");
+    };
+
+    // Evento para abrir/cerrar popup de Novedades — MODIFICADO
+    btnNovedades.addEventListener("click", (e) => {
+        e.stopPropagation();
+        cerrarPopups();
+        const estabaOculto = popupNovedades.classList.contains("hidden");
+        popupNovedades.classList.toggle("hidden");
+        // Cargar campañas solo al abrir
+        if (estabaOculto) this.cargarCampanas();
+        this.log('Popup Novedades toggled', 'info');
+    });
+
+    // Evento para abrir/cerrar popup de Notificaciones — sin cambios
+    btnNotificaciones.addEventListener("click", (e) => {
+        e.stopPropagation();
+        cerrarPopups();
+        popupNotificaciones.classList.toggle("hidden");
+        this.log('Popup Notificaciones toggled', 'info');
+    });
+
+    // Cerrar popups al hacer click afuera — sin cambios
+    document.addEventListener("click", () => {
+        cerrarPopups();
+    });
+
+    this.log('Event listeners inicializados correctamente', 'success');
+},
+
+ // Función para cargar campañas desde la API — NUEVO
+cargarCampanas: async function() {
+    const lista = document.getElementById('novedadesLista');
+    if (!lista) return;
+
+    const token = localStorage.getItem('growhouse-auth-token');
+    if (!token) return;
+
+    lista.innerHTML = '<p class="text-sm text-gray-500 p-4">Cargando...</p>';
+
+    const CAMPAIGN_STYLES = {
+        nuevo_producto: { label: '🌱 Nuevo producto', color: 'text-green-600' },
+        descuento:      { label: '🏷️ Descuento',      color: 'text-orange-500' },
+        novedad:        { label: '✨ Novedad',         color: 'text-blue-500'  },
+        general:        { label: '📢 General',         color: 'text-gray-500'  }
+    };
+
+    try {
+        const res  = await fetch('http://localhost:5000/api/admin/marketing/campaigns/public', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (!data.success || data.data.length === 0) {
+            lista.innerHTML = '<p class="text-sm text-gray-500 p-4">No hay novedades por ahora.</p>';
             return;
         }
 
-        // Función para cerrar todos los popups
-        const cerrarPopups = () => {
-            if (popupNovedades) popupNovedades.classList.add("hidden");
-            if (popupNotificaciones) popupNotificaciones.classList.add("hidden");
-        };
+        lista.innerHTML = data.data.map(c => {
+            const style = CAMPAIGN_STYLES[c.type] || CAMPAIGN_STYLES.general;
+            const fecha = new Date(c.createdAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
+            return `
+                <div class="p-4 hover:bg-gray-50 transition">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-medium ${style.color}">${style.label}</span>
+                        <span class="text-xs text-gray-400">${fecha}</span>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-800">${c.subject}</p>
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">${c.message}</p>
+                </div>`;
+        }).join('');
 
-        // Evento para abrir/cerrar popup de Novedades
-        btnNovedades.addEventListener("click", (e) => {
-            e.stopPropagation();
-            cerrarPopups();
-            popupNovedades.classList.toggle("hidden");
-            this.log('Popup Novedades toggled', 'info');
-        });
-
-        // Evento para abrir/cerrar popup de Notificaciones
-        btnNotificaciones.addEventListener("click", (e) => {
-            e.stopPropagation();
-            cerrarPopups();
-            popupNotificaciones.classList.toggle("hidden");
-            this.log('Popup Notificaciones toggled', 'info');
-        });
-
-        // Cerrar popups al hacer click afuera
-        document.addEventListener("click", () => {
-            cerrarPopups();
-        });
-
-        this.log('Event listeners inicializados correctamente', 'success');
-    },
+    } catch (err) {
+        lista.innerHTML = '<p class="text-sm text-gray-500 p-4">Error al cargar novedades.</p>';
+        this.log('Error cargando campañas: ' + err.message, 'error');
+    }
+},
 
     /**
      * 🚀 Inicializa el gestor

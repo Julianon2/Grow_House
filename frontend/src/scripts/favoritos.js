@@ -38,7 +38,7 @@ function isUserAuthenticated() {
         return authAPI.isAuthenticated();
     }
     // Fallback a localStorage si authAPI no está disponible
-    const token = localStorage.getItem('growhouse_token');
+    const token = localStorage.getItem('growhouse-auth-token');
     return !!token;
 }
 
@@ -46,8 +46,18 @@ function isUserAuthenticated() {
  * Obtener información del usuario actual
  */
 function getCurrentUser() {
-    const userStr = localStorage.getItem('growhouse_user');
+    const userStr = localStorage.getItem('growhouse-user-data');
     return userStr ? JSON.parse(userStr) : null;
+}
+
+/**
+ * Obtener clave de almacenamiento única por usuario
+ */
+function getUserStorageKey() {
+    const user = getCurrentUser();
+    if (!user) return null;
+    const userId = user.id || user.email || user._id;
+    return `growhouse-favorites-${userId}`;
 }
 
 /**
@@ -211,8 +221,9 @@ function loadFavorites() {
         }
         
         // IMPORTANTE: Usar clave simple y consistente
-        const simpleKey = FAVORITES_CONFIG.storage.key;
-        console.log('🔑 Clave de almacenamiento (simple):', simpleKey);
+        const simpleKey = getUserStorageKey();
+        if (!simpleKey) { userFavorites = []; return []; }
+        console.log('🔑 Clave de almacenamiento (usuario):', simpleKey);
         
         const stored = localStorage.getItem(simpleKey);
         console.log('📊 Datos en localStorage:', stored ? `${stored.length} caracteres` : 'null');
@@ -256,8 +267,9 @@ function saveFavorites() {
         }
         
         // IMPORTANTE: Usar clave simple y consistente
-        const simpleKey = FAVORITES_CONFIG.storage.key;
-        console.log('🔑 Clave de almacenamiento (simple):', simpleKey);
+        const simpleKey = getUserStorageKey();
+        if (!simpleKey) return false;
+        console.log('🔑 Clave de almacenamiento (usuario):', simpleKey);
         console.log('💾 Datos a guardar:', userFavorites.length, 'favoritos');
         console.log('📋 Productos:', userFavorites.map(f => f.name));
         

@@ -139,11 +139,21 @@ function createProductCard(producto) {
                     class="ver-detalles-btn bg-green-700 text-white px-4 py-1.5 rounded-lg hover:bg-green-600 transition duration-300 text-sm text-center flex-1 font-medium">
                     Ver Detalles
                 </button>
-                <button onclick="addToCartFromAPI('${producto.id}')"
-                    class="add-to-cart-btn bg-green-800 text-white px-4 py-1.5 rounded-lg hover:bg-green-900 transition duration-300 text-sm text-center flex-1 font-medium ${producto.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
-                    ${producto.quantity === 0 ? 'disabled' : ''}>
-                    Al Carrito
-                </button>
+                ${(function() {
+                    const user = JSON.parse(localStorage.getItem('growhouse-user-data'));
+                    if (user && user.role === 'admin') {
+                        return `<button onclick="editProductFromCard('${producto.id}')"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-lg transition duration-300 text-sm text-center flex-1 font-medium">
+                            ✏️ Editar
+                        </button>`;
+                    } else {
+                        return `<button onclick="addToCartFromAPI('${producto.id}')"
+                            class="add-to-cart-btn bg-green-800 text-white px-4 py-1.5 rounded-lg hover:bg-green-900 transition duration-300 text-sm text-center flex-1 font-medium ${producto.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                            ${producto.quantity === 0 ? 'disabled' : ''}>
+                            Al Carrito
+                        </button>`;
+                    }
+                })()}
             </div>
         </div>
     `;
