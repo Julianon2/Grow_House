@@ -29,6 +29,9 @@ console.log('🚀 Iniciando Grow House Backend...');
 // Crear aplicación Express
 const app = express();
 
+// Necesario para Render (y cualquier proxy inverso): permite leer IP real del cliente
+app.set('trust proxy', 1);
+
 // =============================================
 // HELMET - HEADERS DE SEGURIDAD
 // =============================================
