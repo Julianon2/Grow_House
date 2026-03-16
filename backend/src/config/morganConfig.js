@@ -56,6 +56,3 @@ const morganMiddleware = morgan(
 );
 
 module.exports = morganMiddleware;
-
-console.log('✅ Morgan configurado');
-console.log(`   📊 Formato: ${process.env.NODE_ENV === 'production' ? 'producción' : 'desarrollo'}`);

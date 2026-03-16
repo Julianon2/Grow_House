@@ -1,7 +1,5 @@
 const { body, validationResult } = require('express-validator');
 
-console.log('🔍 Inicializando validadores de productos');
-
 // =====================================================
 // VALIDACIÓN PARA CREAR/ACTUALIZAR PRODUCTO
 // =====================================================
@@ -81,9 +79,6 @@ const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     
     if (!errors.isEmpty()) {
-        console.log('❌ Errores de validación de producto:');
-        console.log(JSON.stringify(errors.array(), null, 2));
-        
         const formattedErrors = errors.array().map(error => ({
             campo: error.path,
             mensaje: error.msg,
@@ -99,7 +94,6 @@ const handleValidationErrors = (req, res, next) => {
         });
     }
     
-    console.log('✅ Validación de producto exitosa');
     next();
 };
 
@@ -107,5 +101,3 @@ module.exports = {
     productValidation,
     handleValidationErrors
 };
-
-console.log('✅ Validadores de productos exportados');

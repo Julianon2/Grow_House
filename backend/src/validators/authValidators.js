@@ -1,7 +1,5 @@
 const { body, validationResult } = require('express-validator');
 
-console.log('🔍 Inicializando validadores de autenticación');
-
 // =====================================================
 // REGLAS DE VALIDACIÓN PARA REGISTRO
 // =====================================================
@@ -132,9 +130,6 @@ const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     
     if (!errors.isEmpty()) {
-        console.log('❌ Errores de validación encontrados:');
-        console.log(JSON.stringify(errors.array(), null, 2));
-        
         // Formatear errores de forma más amigable
         const formattedErrors = errors.array().map(error => ({
             campo: error.path,
@@ -151,7 +146,6 @@ const handleValidationErrors = (req, res, next) => {
         });
     }
     
-    console.log('✅ Validación exitosa - Datos correctos');
     next();
 };
 
@@ -165,10 +159,3 @@ module.exports = {
     updateProfileValidation,
     handleValidationErrors
 };
-
-console.log('✅ Validadores de autenticación exportados');
-console.log('📋 Validaciones disponibles:');
-console.log('   • registerValidation - Para registro de usuarios');
-console.log('   • loginValidation - Para login');
-console.log('   • updateProfileValidation - Para actualizar perfil');
-console.log('   • handleValidationErrors - Middleware de manejo de errores');

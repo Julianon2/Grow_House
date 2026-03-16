@@ -80,7 +80,7 @@ function renderProducts(products, container) {
 function createProductCard(producto) {
     const card = document.createElement('div');
     card.className = 'product-card hover-lift rounded-2xl overflow-hidden shadow-lg group';
-    card.setAttribute('data-product-id', producto._id);
+    card.setAttribute('data-product-id', producto.id || producto._id);
 
     const hasDiscount = producto.originalPrice && producto.originalPrice > producto.price;
     const discountPercent = hasDiscount
@@ -135,19 +135,19 @@ function createProductCard(producto) {
                 ` : ''}
             </div>
             <div class="flex gap-2">
-                <button onclick="viewProductDetail('${producto.id}')"
+                <button onclick="viewProductDetail('${producto.id || producto._id}')"
                     class="ver-detalles-btn bg-green-700 text-white px-4 py-1.5 rounded-lg hover:bg-green-600 transition duration-300 text-sm text-center flex-1 font-medium">
                     Ver Detalles
                 </button>
                 ${(function() {
                     const user = JSON.parse(localStorage.getItem('growhouse-user-data'));
                     if (user && user.role === 'admin') {
-                        return `<button onclick="editProductFromCard('${producto.id}')"
+                        return `<button onclick="editProductFromCard('${producto.id || producto._id}')"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-lg transition duration-300 text-sm text-center flex-1 font-medium">
                             ✏️ Editar
                         </button>`;
                     } else {
-                        return `<button onclick="addToCartFromAPI('${producto.id}')"
+                        return `<button onclick="addToCartFromAPI('${producto.id || producto._id}')"
                             class="add-to-cart-btn bg-green-800 text-white px-4 py-1.5 rounded-lg hover:bg-green-900 transition duration-300 text-sm text-center flex-1 font-medium ${producto.quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
                             ${producto.quantity === 0 ? 'disabled' : ''}>
                             Al Carrito
