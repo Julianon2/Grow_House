@@ -269,49 +269,42 @@ https://grow-house-backend.onrender.com
 
 ## 8. Configurar variables de entorno en Render
 
-En el servicio backend ve a **"Environment"** en el menú lateral izquierdo y agrega las siguientes variables una por una:
+En el servicio backend ve a **"Environment"** en el menú lateral izquierdo.
 
-> **Cómo agregar:** Haz clic en **"Add Environment Variable"**, escribe el nombre en **"Key"** y el valor en **"Value"** → repite para cada variable.
+### Usar "Paste from .env" (forma rápida)
 
-```
-NODE_ENV          = production
+Render tiene una opción para pegar todas las variables de una sola vez:
 
-MONGODB_URI       = mongodb+srv://grow_house:TU_PASSWORD@growhouse.ksrsa1n.mongodb.net/growhouse?retryWrites=true&w=majority&appName=GrowHouse
-
-JWT_SECRET        = pega-aqui-una-clave-larga-y-aleatoria
-JWT_EXPIRE        = 30d
-JWT_COOKIE_EXPIRE = 30
-
-OPENAI_API_KEY    = sk-proj-...tu-clave-de-openai...
-
-GOOGLE_CLIENT_ID  = 873365892028-gpklspl23p04fidlkvbva2mp3u2o2sbi.apps.googleusercontent.com
-
-# Sistema de email principal — verificación de cuentas y correos de admin
-SMTP_HOST         = smtp.gmail.com
-SMTP_PORT         = 587
-SMTP_SECURE       = false
-SMTP_USER         = growhouse011@gmail.com
-SMTP_PASS         = tu-app-password-de-gmail-de-16-caracteres
-
-# Sistema de email secundario — recuperación de contraseña
-EMAIL_USER        = testgrowhouse@gmail.com
-EMAIL_PASS        = tu-app-password-de-gmail-de-16-caracteres
-
-# URL del frontend — actualizar en el paso 10 con la URL real
-FRONTEND_URL      = https://PENDIENTE.onrender.com
-```
-
-**Cómo generar un JWT_SECRET seguro** — ejecuta esto en la terminal de VS Code:
+1. Haz clic en el botón **"Paste from .env"**
+2. Pega el siguiente bloque completo y haz clic en **"Add"**
 
 ```
-node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://USUARIO:PASSWORD@cluster.mongodb.net/growhouse?retryWrites=true&w=majority&appName=GrowHouse
+JWT_SECRET=TU_CLAVE_SECRETA_LARGA_Y_ALEATORIA
+JWT_EXPIRE=30d
+JWT_EXPIRES_IN=24h
+JWT_COOKIE_EXPIRE=30
+OPENAI_API_KEY=sk-proj-TU_CLAVE_DE_OPENAI
+AI_MODEL=gpt-4o-mini
+GOOGLE_CLIENT_ID=TU_GOOGLE_CLIENT_ID.apps.googleusercontent.com
+GOOGLE_CLIENT_KEY=TU_GOOGLE_CLIENT_SECRET
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=TU_CORREO@gmail.com
+SMTP_PASS=TU_APP_PASSWORD_DE_GMAIL
+EMAIL_USER=TU_CORREO_SECUNDARIO@gmail.com
+EMAIL_PASS=TU_APP_PASSWORD_SECUNDARIO
+BACKEND_URL=https://grow-house-backend.onrender.com
+FRONTEND_URL=https://PENDIENTE.onrender.com
 ```
 
-Copia el resultado completo y úsalo como valor de `JWT_SECRET`.
+3. Haz clic en **"Save Changes"** — Render redespliegue el backend automáticamente
 
-> **Nota sobre PORT:** No es necesario configurarlo. Render lo inyecta automáticamente y el servidor ya lo usa con `process.env.PORT || 5000`.
+> **`FRONTEND_URL`** es la única que queda pendiente — la actualizas en el paso 10 con la URL real del Static Site.
 
-Cuando termines de agregar todas las variables, haz clic en **"Save Changes"**. Render redespliegue el backend automáticamente.
+> **`PORT` no va aquí** — Render lo inyecta automáticamente.
 
 ---
 
@@ -326,7 +319,7 @@ Abre el archivo `frontend/src/scripts/config.js` y reemplaza la URL de ejemplo p
 ```js
 window.GROW_HOUSE_API = isLocal
     ? 'http://localhost:5000/api'
-    : 'https://EL-NOMBRE-REAL-DE-TU-BACKEND.onrender.com/api';  // ← cambia esto
+    : 'https://grow-house-backend.onrender.com/api';
 ```
 
 Guarda el archivo y sube el cambio a GitHub:
@@ -349,10 +342,21 @@ git push
 | **Branch** | `main` |
 | **Root Directory** | `frontend` |
 | **Build Command** | *(dejar completamente vacío)* |
-| **Publish Directory** | `src/pages` |
+| **Publish Directory** | `.` |
 
-> El frontend es HTML/CSS/JS puro — no hay proceso de compilación.
-> El `index.html` principal está en `frontend/src/pages/index.html`, por eso el Publish Directory es `src/pages`.
+> **¿Por qué `.` como Publish Directory?**
+> El `.` le dice a Render que sirva toda la carpeta `frontend/` como raíz del sitio.
+> Así la estructura queda:
+> ```
+> frontend/                  ← Publish Directory (web root)
+> ├── index.html             → redirige automáticamente a src/pages/index.html
+> └── src/
+>     ├── pages/             → accesible en /src/pages/login.html, etc.
+>     ├── scripts/           → accesible en /src/scripts/auth-api.js
+>     ├── styles/            → accesible en /src/styles/output.css
+>     └── assets/            → accesible en /src/assets/...
+> ```
+> El `index.html` en la raíz de `frontend/` redirige al visitante a `src/pages/index.html` de forma transparente. Los HTML de `src/pages/` ya usan rutas relativas `../styles/` y `../scripts/` que funcionan correctamente con esta estructura.
 
 4. **Environment Variables:** dejar vacío — el frontend no usa variables de entorno del servidor
 5. Haz clic en **"Deploy Static Site"**

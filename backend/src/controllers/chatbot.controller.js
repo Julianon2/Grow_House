@@ -4,16 +4,23 @@
 
 const OpenAI = require('openai');
 
-// Inicializar cliente de OpenAI con verificación
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
-
-// Verificar API Key al iniciar
-console.log('🔑 OpenAI API Key:', process.env.OPENAI_API_KEY ? 
-  `Configurada (${process.env.OPENAI_API_KEY.substring(0, 10)}...)` : 
+// Verificar API Key al iniciar (sin crashear el servidor si falta)
+console.log('🔑 OpenAI API Key:', process.env.OPENAI_API_KEY ?
+  `Configurada (${process.env.OPENAI_API_KEY.substring(0, 10)}...)` :
   '❌ NO ENCONTRADA'
 );
+
+// Inicialización lazy: el cliente se crea solo cuando se necesita
+let _openai = null;
+function getOpenAIClient() {
+    if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY no está configurada en las variables de entorno');
+    }
+    if (!_openai) {
+        _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    }
+    return _openai;
+}
 
 // =============================================
 // CONFIGURACIÓN DEL CHATBOT
@@ -82,7 +89,7 @@ exports.chat = async (req, res) => {
         console.log(`📊 Historial: ${conversationHistory.length} mensajes`);
 
         // Llamada a OpenAI con modelo actualizado
-        const completion = await openai.chat.completions.create({
+        const completion = await getOpenAIClient().chat.completions.create({
             model: 'gpt-4o-mini', // Modelo más económico y accesible
             messages: messages,
             temperature: 0.7,
