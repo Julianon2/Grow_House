@@ -133,7 +133,7 @@ cargarCampanas: async function() {
     };
 
     try {
-        const res  = await fetch('http://localhost:5000/api/admin/marketing/campaigns/public', {
+        const res  = await fetch(window.GROW_HOUSE_API + '/admin/marketing/campaigns/public', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();

@@ -6,6 +6,7 @@
 <title> Dashboard | Clientes - Grow House</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="../scripts/config.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 </head>
@@ -199,7 +200,7 @@ if(!token){
     window.location.href = "login.html";
 }
 
-const API = 'http://localhost:5000/api/admin/customers';
+const API = window.GROW_HOUSE_API + '/admin/customers';
 let currentPage = 1;
 let totalPages = 1;
 

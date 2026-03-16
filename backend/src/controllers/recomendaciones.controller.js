@@ -3,7 +3,7 @@
 // =============================================
 
 const mongoose = require('mongoose');
-const Product = mongoose.models.Product || require('../models/Product');
+const Product = mongoose.models.Product || require('../models/product');
 const User    = require('../models/User');
 const jwt     = require('jsonwebtoken');
 

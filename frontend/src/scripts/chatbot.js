@@ -19,16 +19,7 @@ const CHATBOT_CONFIG = {
  * Obtener URL base de la API según el ambiente
  */
 function getAPIBaseURL() {
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    
-    // En localhost, usar localhost:5000
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:5000/api';
-    }
-    
-    // En producción, usar la misma URL pero con /api
-    return `${protocol}//${window.location.host}/api`;
+    return window.GROW_HOUSE_API;
 }
 
 // =============================================

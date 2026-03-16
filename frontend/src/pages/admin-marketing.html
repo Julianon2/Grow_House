@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard | Marketing - Grow House</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../scripts/config.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
@@ -316,7 +317,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const API_BASE = 'http://localhost:5000/api';
+  const API_BASE = window.GROW_HOUSE_API;
 
   function getToken()    { return localStorage.getItem('growhouse-auth-token') || ''; }
   function authHeaders() { return { 'Content-Type':'application/json', 'Authorization':`Bearer ${getToken()}` }; }

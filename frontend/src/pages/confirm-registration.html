@@ -40,6 +40,7 @@
         </div>
     </div>
 
+    <script src="../scripts/config.js"></script>
     <script src="../scripts/auth-api.js"></script>
     <script>
         // Obtener parámetros de la URL
@@ -55,7 +56,7 @@
             // Confirmar el registro automáticamente
             console.log('📧 Confirmando registro para:', email);
             
-            fetch(`http://localhost:5000/api/auth/confirm-registration?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`)
+            fetch(`${window.GROW_HOUSE_API}/auth/confirm-registration?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`)
                 .then(response => response.json())
                 .then(result => {
                     console.log('✅ Respuesta del servidor:', result);

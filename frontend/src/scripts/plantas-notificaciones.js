@@ -5,7 +5,7 @@
  * registrados en MongoDB para cada planta del usuario.
  */
 
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = window.GROW_HOUSE_API;
 
 /* ─── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -337,7 +337,7 @@ async function cargarYRenderizarNotificaciones() {
   if (!token) return; // sin sesión → sin notificaciones de plantas
 
   try {
-    const res  = await fetch(`${API_BASE}/api/registro`, {
+    const res  = await fetch(`${API_BASE}/registro`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();

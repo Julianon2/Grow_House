@@ -47,62 +47,67 @@ router.post('/verificar-codigo', verificarCodigo);
 router.post('/cambiar-password', cambiarPassword);
 
 // =============================================
-// LOGIN CON GOOGLE
+// LOGIN / REGISTRO CON GOOGLE (un solo paso)
 // =============================================
 
 router.post("/google-login", async (req, res) => {
     const { token } = req.body;
     try {
+        // 1. Verificar que el token es auténtico (Google ya verificó la identidad)
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();
-        const user = await User.findOne({ email: payload.email });
+
+        // 2. Buscar usuario por googleId o por email
+        let user = await User.findOne({
+            $or: [{ googleId: payload.sub }, { email: payload.email }]
+        });
+
+        let isNewUser = false;
 
         if (!user) {
-            return res.status(403).json({
-                success: false,
-                message: "Usuario no registrado. Debe registrarse primero."
+            // 3a. No existe → crear cuenta automáticamente con los datos de Google
+            user = new User({
+                firstName:       payload.given_name  || payload.name.split(' ')[0] || 'Usuario',
+                lastName:        payload.family_name || payload.name.split(' ').slice(1).join(' ') || 'Google',
+                email:           payload.email,
+                googleId:        payload.sub,
+                avatar:          payload.picture || null,
+                isEmailVerified: true,
+                role:            'customer'
             });
+            await user.save();
+            isNewUser = true;
+            console.log(`✅ Nueva cuenta creada con Google: ${user.email}`);
+        } else if (!user.googleId) {
+            // 3b. Existe por email pero nunca usó Google → vincular la cuenta
+            user.googleId        = payload.sub;
+            user.isEmailVerified = true;
+            if (!user.avatar && payload.picture) user.avatar = payload.picture;
+            await user.save();
+            console.log(`🔗 Cuenta vinculada con Google: ${user.email}`);
         }
 
-        const confirmationCode = Math.floor(100000 + Math.random() * 900000);
-        user.loginConfirmationCode = confirmationCode;
-        user.codeExpiresAt = Date.now() + 5 * 60 * 1000;
-        await user.save();
+        if (!user.isActive) {
+            return res.status(401).json({ success: false, message: 'Cuenta desactivada. Contacta soporte.' });
+        }
 
-        await sendVerificationCode(user.email, user.firstName, confirmationCode);
+        // 4. Generar JWT y responder directamente
+        await user.resetLoginAttempts();
+        const myToken = user.generateAuthToken();
 
         res.json({
-            success: true,
-            message: "Se envió un código de confirmación a tu correo.",
-            email: user.email
+            success:   true,
+            token:     myToken,
+            user:      user.getPublicProfile(),
+            isNewUser
         });
 
     } catch (error) {
         console.error("Error Google Login:", error);
-        res.status(401).json({ success: false, message: "Token inválido" });
-    }
-});
-
-router.post("/confirm-login", async (req, res) => {
-    const { email, code } = req.body;
-    try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ success: false, message: "Usuario no encontrado" });
-        if (user.loginConfirmationCode != code) return res.status(400).json({ success: false, message: "Código inválido" });
-        if (user.codeExpiresAt < Date.now()) return res.status(400).json({ success: false, message: "Código expirado" });
-
-        const myToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-        user.loginConfirmationCode = null;
-        user.codeExpiresAt = null;
-        await user.save();
-
-        res.json({ success: true, token: myToken, user: user.getPublicProfile() });
-
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Error interno" });
+        res.status(401).json({ success: false, message: "Token de Google inválido" });
     }
 });
 

@@ -438,9 +438,10 @@
 
   <canvas id="canvas"></canvas>
 
+<script src="../scripts/config.js"></script>
 <script>
-  // ✅ Cambia SOLO aquí si tu backend usa otro puerto
-  const API_BASE = 'http://127.0.0.1:5000';
+  // ✅ URL del backend gestionada por config.js
+  const API_BASE = window.GROW_HOUSE_API;
 
   const CLAVE = 'zuri_plantas_v1';
   let imagenActual   = null;
@@ -538,7 +539,7 @@
     </div>`;
 
   try {
-    const response = await fetch(`${API_BASE}/api/registro/analizar`, {
+    const response = await fetch(`${API_BASE}/registro/analizar`, {
       method:  'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -613,7 +614,7 @@
   if (btnGuardar) { btnGuardar.disabled = true; btnGuardar.textContent = 'Guardando...'; }
 
   try {
-    const response = await fetch(`${API_BASE}/api/registro/analizar-y-guardar`, {
+    const response = await fetch(`${API_BASE}/registro/analizar-y-guardar`, {
       method:  'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -1,10 +1,10 @@
-const ADMIN_API_URL = 'http://localhost:5000/api/admin/products';
+const ADMIN_API_URL = window.GROW_HOUSE_API + '/admin/products';
 let currentEditingId = null;
 
 window.editProductFromCard = async function(productId) {
     try {
         const token = localStorage.getItem('growhouse-auth-token');
-        const response = await axios.get(`http://localhost:5000/api/products/${productId}`, {
+        const response = await axios.get(`${window.GROW_HOUSE_API}/products/${productId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const product = response.data.data;

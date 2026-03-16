@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../scripts/config.js"></script>
 </head>
 <body class="bg-gray-50">
 
@@ -264,7 +265,7 @@ bg-gradient-to-b from-[#03651f] via-[#057a2b] to-[#045e1f]">
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="../scripts/admin-auth.js"></script>
 <script>
-const API_URL = "http://localhost:5000/api/admin/coupons";
+const API_URL = window.GROW_HOUSE_API + '/admin/coupons';
 
 function formatDateYMD(dateString) {
     const d = new Date(dateString);

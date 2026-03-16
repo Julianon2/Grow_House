@@ -154,9 +154,6 @@ app.get('/', (req, res) => {
 // =============================================
 // LOGIN O REGISTER CON GOOGLE
 // =============================================
-app.use(cors());
-app.use(express.json());
-
 app.use("/api/auth", authRoutes);
 
 

@@ -5,7 +5,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
-const product = require('../models/Product');
+const product = require('../models/product');
 const authController = require('../controllers/authController');
 
 console.log('🧪 Testing del controlador de autenticación\n');

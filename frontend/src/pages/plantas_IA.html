@@ -440,6 +440,7 @@
 
     <canvas id="canvas" style="display: none;"></canvas>
 
+    <script src="../scripts/config.js"></script>
     <script>
         let imagenActual = null;
         let stream = null;
@@ -540,7 +541,7 @@
             `;
             
             try {
-                const response = await fetch("http://localhost:5000/api/espacios/analizar", {
+                const response = await fetch(window.GROW_HOUSE_API + "/espacios/analizar", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

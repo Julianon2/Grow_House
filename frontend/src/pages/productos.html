@@ -588,6 +588,8 @@
         </div>
 
         </footer>
+<!-- Config - PRIMERO -->
+<script src="../scripts/config.js"></script>
 <!-- Auth API - PRIMERO -->
 <script src="../scripts/auth-api.js"></script>
 
@@ -683,7 +685,7 @@ async function cargarProductos(page = 1) {
             : '';
 
         const res = await fetch(
-            `http://localhost:5000/api/products?status=active&limit=${LIMIT}&page=${page}${searchParam}`
+            `${window.GROW_HOUSE_API}/products?status=active&limit=${LIMIT}&page=${page}${searchParam}`
         );
         if (!res.ok) throw new Error(`Error ${res.status}`);
 

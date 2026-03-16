@@ -225,6 +225,7 @@
     </div>
 </footer>
 
+<script src="../scripts/config.js"></script>
 <script src="../scripts/auth-api.js"></script>
 <script src="../scripts/profile-image.js"></script>
 <script src="../scripts/navbar-avatar.js"></script>
@@ -234,7 +235,7 @@
 <script src="../scripts/main.js"></script>
 
 <script>
-const API_URL    = 'http://localhost:5000/api';
+const API_URL    = window.GROW_HOUSE_API;
 let currentOrder = null;
 
 const BUSINESS = {

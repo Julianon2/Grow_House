@@ -9,7 +9,7 @@
 
 class AdminAuth {
     constructor() {
-        this.API_URL = 'http://localhost:5000/api';
+        this.API_URL = window.GROW_HOUSE_API;
         
         // 🔑 USAR LAS MISMAS CLAVES QUE AUTH-API.JS
         this.STORAGE_KEYS = {

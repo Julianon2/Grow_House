@@ -10,7 +10,7 @@ console.log('🛒 checkout.js cargando...');
 // =============================================
 
 const CHECKOUT_CONFIG = {
-    apiUrl: 'http://localhost:5000/api',
+    apiUrl: window.GROW_HOUSE_API,
     cartKey: 'Grow-House-cart-data',
     tokenKey: 'growhouse-auth-token',
     currency: { locale: 'es-CO', symbol: '$' },

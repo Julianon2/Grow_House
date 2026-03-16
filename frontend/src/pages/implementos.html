@@ -576,6 +576,8 @@
         </div>
 
         </footer>
+<!-- Config - PRIMERO -->
+<script src="../scripts/config.js"></script>
 <!-- Auth API - PRIMERO -->
 <script src="../scripts/auth-api.js"></script>
 
@@ -687,7 +689,7 @@ async function cargarCategoria(page = 1) {
     try {
         const searchParam = searchQuery.trim() ? `&search=${encodeURIComponent(searchQuery.trim())}` : '';
         const res = await fetch(
-            `http://localhost:5000/api/products?category=${CATEGORY}&status=active&limit=${LIMIT}&page=${page}${searchParam}`
+            `${window.GROW_HOUSE_API}/products?category=${CATEGORY}&status=active&limit=${LIMIT}&page=${page}${searchParam}`
         );
         if (!res.ok) throw new Error(`Error ${res.status}`);
 
@@ -747,7 +749,7 @@ async function buscarConValidacion() {
     try {
         // 1️⃣ Buscar dentro de ESTA categoría
         const resCat = await fetch(
-            `http://localhost:5000/api/products?category=${CATEGORY}&status=active&limit=${LIMIT}&page=1&search=${encodeURIComponent(query)}`
+            `${window.GROW_HOUSE_API}/products?category=${CATEGORY}&status=active&limit=${LIMIT}&page=1&search=${encodeURIComponent(query)}`
         );
         const jsonCat = await resCat.json();
         const enEstaCategoria = jsonCat.data || [];

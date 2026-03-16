@@ -584,6 +584,8 @@
             </div>
         </footer>
 
+    <!-- Config - PRIMERO -->
+    <script src="../scripts/config.js"></script>
     <!-- Auth API - PRIMERO -->
     <script src="../scripts/auth-api.js"></script>
 
@@ -653,7 +655,7 @@
             }
 
             // ✅ Hacer la petición al backend
-            const response = await fetch('http://localhost:5000/api/orders/my-orders', {
+            const response = await fetch(window.GROW_HOUSE_API + '/orders/my-orders', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

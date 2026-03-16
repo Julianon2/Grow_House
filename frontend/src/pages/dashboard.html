@@ -376,13 +376,14 @@
      ===================================================== -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="../scripts/config.js"></script>
 <script src="../scripts/admin-auth.js"></script>
 
 <script>
 // ─────────────────────────────────────────────
 // CONSTANTES
 // ─────────────────────────────────────────────
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = window.GROW_HOUSE_API;
 const BUSINESS = {
     name:    'Grow House',
     nit:     '900.123.456-7',

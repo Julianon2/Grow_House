@@ -693,6 +693,8 @@
         </div>
 
     </footer>
+    <!-- Config - PRIMERO -->
+    <script src="../scripts/config.js"></script>
     <!-- Auth API - PRIMERO -->
     <script src="../scripts/auth-api.js"></script>
 
@@ -830,7 +832,7 @@
     async function cargarProductosDestacados() {
         const grid = document.getElementById('featured-grid');
         try {
-            const response = await fetch('http://localhost:5000/api/products?featured=true&status=active&limit=4');
+            const response = await fetch(window.GROW_HOUSE_API + '/products?featured=true&status=active&limit=4');
             if (!response.ok) throw new Error(`Error del servidor: ${response.status}`);
             const json     = await response.json();
             const productos = json.data || [];
@@ -864,7 +866,7 @@
     <!-- ✅ Recomendaciones Para Ti — script único -->
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        const API     = 'http://localhost:5000';
+        const API     = window.GROW_HOUSE_API;
         const seccion = document.getElementById('productosrecomendadosparati');
 
         function getToken() {
@@ -892,7 +894,7 @@
 
         try {
             // 1️⃣ Verificar si completó la encuesta
-            const estadoRes = await fetch(`${API}/api/recomendaciones/estado`, {
+            const estadoRes = await fetch(`${API}/recomendaciones/estado`, {
                 headers: authHeaders(),
             });
 
@@ -903,7 +905,7 @@
             if (!estado.completada) { mostrarInvitacion(); return; }
 
             // 2️⃣ Traer recomendaciones guardadas
-            const recomRes = await fetch(`${API}/api/recomendaciones`, {
+            const recomRes = await fetch(`${API}/recomendaciones`, {
                 method:  'POST',
                 headers: authHeaders(),
                 body:    JSON.stringify(estado.preferencias),

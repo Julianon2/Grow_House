@@ -4,7 +4,7 @@ const ProfileImageManager = {
     config: {
         maxFileSize: 3 * 1024 * 1024, // 3MB
         allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-        apiURL: 'http://localhost:5000/api/avatar'
+        apiURL: window.GROW_HOUSE_API + '/avatar'
     },
 
     init: function () {

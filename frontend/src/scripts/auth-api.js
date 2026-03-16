@@ -1,7 +1,7 @@
 console.log('🔐 Inicializando auth-api.js');
 
 const AUTH_CONFIG = {
-    baseURL: 'http://localhost:5000/api/auth',
+    baseURL: window.GROW_HOUSE_API + '/auth',
     timeout: 10000,
     storage: {
         tokenKey: 'growhouse-auth-token',      // Donde guardamos el JWT

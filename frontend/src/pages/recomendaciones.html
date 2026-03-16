@@ -372,6 +372,7 @@
   REEMPLAZA el <script> de tu encuesta.html con este.
   Adaptado a tu controller: usa "recomendaciones" en la respuesta.
 ============================================= -->
+<script src="../scripts/config.js"></script>
 <script>
   const preferencias = { ubicacion: "", tipo: "", presupuesto: 0, preferencia: "" };
 
@@ -393,7 +394,7 @@
     if (!token) { window.location.href = 'login.html'; return; }
 
     try {
-      const res = await fetch('http://localhost:5000/api/recomendaciones/estado', {
+      const res = await fetch(window.GROW_HOUSE_API + '/recomendaciones/estado', {
         headers: authHeaders(),
       });
 
@@ -463,7 +464,7 @@
     document.getElementById('loading').style.display = 'block';
 
     try {
-      const res = await fetch('http://localhost:5000/api/recomendaciones', {
+      const res = await fetch(window.GROW_HOUSE_API + '/recomendaciones', {
         method:  'POST',
         headers: authHeaders(),
         body:    JSON.stringify(preferencias),
