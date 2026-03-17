@@ -13,14 +13,15 @@ const UIManager = {
      */
     updateHeader: function() {
         console.log('🔄 Actualizando interfaz del header...');
-        
-        // Verificar si el usuario está autenticado
-        const isAuth = authAPI.isAuthenticated();
-        const user = authAPI.getUser();
+
         if (typeof authAPI === 'undefined') {
             console.warn('authAPI no disponible');
             return;
         }
+
+        // Verificar si el usuario está autenticado
+        const isAuth = authAPI.isAuthenticated();
+        const user = authAPI.getUser();
         
         console.log('Usuario autenticado:', isAuth);
         console.log('Datos del usuario:', user);
@@ -165,24 +166,20 @@ const UIManager = {
         
         // Evento de logout
         if (logoutButton) {
-            logoutButton.addEventListener('click', async () => {
-                console.log('🚪 Cerrando sesión...');
-                
-                // Cerrar sesión
-                authAPI.logout();
-                
-                // Mostrar notificación
-                if (window.showAuthNotification) {
-                    showAuthNotification('Sesión cerrada exitosamente', 'success');
+            logoutButton.addEventListener('click', () => {
+                try {
+                    authAPI.logout();
+                    if (window.showAuthNotification) {
+                        showAuthNotification('Sesión cerrada exitosamente', 'success');
+                    }
+                    this.updateHeader();
+                } catch (e) {
+                    console.error('Error en logout:', e);
+                } finally {
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 800);
                 }
-                
-                // Actualizar UI
-                this.updateHeader();
-                
-                // Redirigir después de un momento
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
             });
         }
         

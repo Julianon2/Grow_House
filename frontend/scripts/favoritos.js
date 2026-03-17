@@ -715,12 +715,22 @@ window.addEventListener('favoritesUpdated', () => {
     }
 });
 
+// Event listener para logout
+window.addEventListener('userLoggedOut', () => {
+    userFavorites = [];
+    updateFavoritesCounter();
+
+    if (window.location.pathname.includes('favoritos.html')) {
+        renderFavoritesPage();
+    }
+});
+
 // Event listener para cambios de autenticación
 window.addEventListener('storage', (e) => {
-    if (e.key === 'growhouse_token') {
+    if (e.key === 'growhouse-auth-token') {
         loadFavorites();
         updateFavoritesCounter();
-        
+
         if (window.location.pathname.includes('favoritos.html')) {
             renderFavoritesPage();
         }

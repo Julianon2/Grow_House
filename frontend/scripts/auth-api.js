@@ -326,9 +326,6 @@ console.log('✅ Código de verificación enviado a:', data.email);
 
         console.log('✅ Sesión cerrada exitosamente');
 
-        if (typeof userFavorites !== 'undefined') userFavorites = [];
-        if (typeof updateFavoritesCounter === 'function') updateFavoritesCounter();
-
         // Emitir evento personalizado para que otras partes de la app
         // sepan que el usuario cerró sesión
         window.dispatchEvent(new CustomEvent('userLoggedOut'));
